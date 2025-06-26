@@ -1,70 +1,87 @@
-# React + TypeScript + Vite
+# 📆 Calendar App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A lightweight and responsive calendar application built using **React**, **TypeScript**, **Zustand**, and **Tailwind CSS**. This project allows users to create, update, and drag events within a month-view layout, mimicking core features of modern calendar tools.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 DEMO LINK 
 
-## Expanding the ESLint configuration
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🚀 Setup & Running Instructions
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### 1. Clone the Repository
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+git clone https://github.com/MuhammadShahud/EmoteCareCalendar
+cd EmoteCareCalendar
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 2. Install Dependencies
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
 ```
-# EmoteCareCalendar
+
+### 3. Start the Development Server
+
+```bash
+npm run dev
+```
+
+The app will start at: `http://localhost:5173`
+
+### 4. Build for Production
+
+```bash
+npm run build
+```
+
+---
+
+## 🧠 Architecture & Design Decisions
+
+### 📦 State Management: Zustand
+
+- Zustand is used as the state management tool for its minimal API, simplicity, and ease of use with React hooks.
+- Manages shared state like:
+  - `modalOpen`: controls the visibility of the event modal.
+  - `events`: a list of calendar events.
+  - `currentDate`: the selected date displayed on the calendar.
+
+### 🧱 Component Structure
+
+- `components/Calendar/MonthView.tsx`: Displays the main month grid with days and their respective events.
+- `components/Event/DraggableEvent.tsx`: Handles rendering and drag interaction for each event.
+- `components/Event/EventModal.tsx`: Modal to create or edit an event.
+- `store/calendar.ts`: Global calendar store powered by Zustand.
+- `App.tsx`: Main entry point that pulls everything together.
+
+---
+
+## ⚠️ Known Issues & Limitations
+
+- Newly added events may sometimes not respond correctly to drag-and-drop until a refresh.
+- Event overlap and conflict resolution are not implemented.
+- Storybook integration was attempted but removed due to context conflicts with `react-dnd`.
+
+---
+
+## 🎁 Bonus Features
+
+- ✅ Drag-and-drop of events using `react-dnd`.
+- ✅ Dark mode support via Tailwind CSS.
+- ✅ Mobile responsiveness.
+- ❌ Storybook (partially implemented and later removed).
+
+---
+
+## 🛠 Tech Stack
+
+- **React** (w/ TypeScript)
+- **Vite** as build tool
+- **Zustand** for global state
+- **Tailwind CSS** for styling
+- **React DnD** for drag-and-drop functionality
+- **Date-fns** for date manipulation
+
+---
