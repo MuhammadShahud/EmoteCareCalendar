@@ -1,3 +1,4 @@
+import React from "react";
 import {
   startOfMonth,
   endOfMonth,
@@ -14,12 +15,14 @@ import { useDrop } from "react-dnd";
 import DraggableEvent from "../../Event/DraggableEvent";
 
 const MonthView = () => {
-  const { currentDate, events, openModal, updateEvent } = useCalendarStore();
+  const { currentDate, events, updateEvent, openModal } = useCalendarStore();
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
   const startDate = startOfWeek(monthStart, { weekStartsOn: 0 });
   const endDate = endOfWeek(monthEnd, { weekStartsOn: 0 });
-  const days = eachDayOfInterval({ start: startDate, end: endDate });
+  const days = React.useMemo(() => {
+    return eachDayOfInterval({ start: startDate, end: endDate });
+  }, [startDate, endDate]);
 
   return (
     <div className="grid grid-cols-7 gap-px bg-gray-300 dark:bg-gray-700 text-[11px] sm:text-sm overflow-x-auto">
@@ -52,7 +55,11 @@ const MonthView = () => {
         return (
           <div
             key={day.toISOString()}
-            ref={drop}
+            ref={drop as unknown as React.Ref<HTMLDivElement>}
+            onClick={(e) => {
+              e.stopPropagation();
+              openModal();
+            }}
             className={`h-32 p-2 relative rounded-sm transition-all border ${
               isToday(day)
                 ? "bg-blue-100 dark:bg-blue-900 border-blue-500"
@@ -63,9 +70,7 @@ const MonthView = () => {
           >
             <div className="text-xs font-semibold mb-1">{format(day, "d")}</div>
             {dayEvents.map((event) => (
-              <div
-                key={event.id}
-              >
+              <div key={event.id}>
                 <DraggableEvent month={true} event={event} />
               </div>
             ))}

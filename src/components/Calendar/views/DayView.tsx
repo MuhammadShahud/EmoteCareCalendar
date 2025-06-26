@@ -53,7 +53,11 @@ const DayView = () => {
           return (
             <div
               key={hour.toISOString()}
-              ref={drop}
+              onClick={(e) => {
+                e.stopPropagation();
+                openModal();
+              }}
+              ref={drop as unknown as React.Ref<HTMLDivElement>}
               className={`h-20 relative px-4 border-b transition-colors ${
                 isOver
                   ? "bg-green-100 dark:bg-green-800"

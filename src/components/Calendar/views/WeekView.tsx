@@ -12,7 +12,7 @@ import { useDrop } from "react-dnd";
 import DraggableEvent from "../../Event/DraggableEvent";
 
 const WeekView = () => {
-  const { currentDate, events, updateEvent } = useCalendarStore();
+  const { currentDate, events, updateEvent, openModal } = useCalendarStore();
   const weekStart = startOfWeek(currentDate, { weekStartsOn: 0 });
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
   const hours = eachHourOfInterval({
@@ -74,7 +74,11 @@ const WeekView = () => {
             return (
               <div
                 key={day.toISOString() + hour.toISOString()}
-                ref={drop}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openModal();
+                }}
+                ref={drop as unknown as React.Ref<HTMLDivElement>}
                 className={`h-20 border relative ${
                   isOver
                     ? "bg-green-100 dark:bg-green-800"
