@@ -6,6 +6,7 @@ A lightweight and responsive calendar application built using **React**, **TypeS
 
 ## 🚀 DEMO LINK 
 
+https://emotecarecalendar.netlify.app/
 
 ## 🚀 Setup & Running Instructions
 
