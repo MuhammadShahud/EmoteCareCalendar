@@ -25,18 +25,22 @@ const EventModal = () => {
     deleteEvent,
   } = useCalendarStore();
 
-  console.log("Modal Event:", modalEvent);
-  
-
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [title, setTitle] = useState("");
+
+  const [errors, setErrors] = useState<{
+    title?: string;
+    startDate?: string;
+    endDate?: string;
+  }>({});
 
   useEffect(() => {
     if (modalOpen) {
       setTitle(modalEvent?.title || "");
       setStartDate(modalEvent?.start ? new Date(modalEvent.start) : null);
       setEndDate(modalEvent?.end ? new Date(modalEvent.end) : null);
+      setErrors({});
     }
   }, [modalOpen, modalEvent]);
 
@@ -50,30 +54,40 @@ const EventModal = () => {
     "bg-indigo-500",
     "bg-teal-500",
   ];
-  
+
   function getRandomColor(): string {
     return colorPalette[Math.floor(Math.random() * colorPalette.length)];
   }
 
-const handleSubmit = () => {
-  if (!title || !startDate || !endDate) return;
+  const handleSubmit = () => {
+    const newErrors: typeof errors = {};
+    if (!title.trim()) newErrors.title = "Title is required.";
+    if (!startDate) newErrors.startDate = "Start date is required.";
+    if (!endDate) newErrors.endDate = "End date is required.";
 
-  const newEvent: CalendarEvent = {
-    id: modalEvent?.id || crypto.randomUUID(),
-    title,
-    start: startDate,
-    end: endDate,
-    color: modalEvent?.color || getRandomColor(), // 💥 assign a color here
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({}); // clear errors
+
+    const newEvent: CalendarEvent = {
+      id: modalEvent?.id || crypto.randomUUID(),
+      title,
+      start: startDate!,
+      end: endDate!,
+      color: modalEvent?.color || getRandomColor(),
+    };
+
+    if (modalEvent?.id) {
+      updateEvent(newEvent);
+    } else {
+      addEvent(newEvent);
+    }
+
+    closeModal();
   };
-
-  if (modalEvent?.id) {
-    updateEvent(newEvent);
-  } else {
-    addEvent(newEvent);
-  }
-
-  closeModal();
-};
 
   const handleDelete = () => {
     if (modalEvent?.id) {
@@ -103,13 +117,14 @@ const handleSubmit = () => {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
+          {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
         </div>
 
         <div>
           <label className="block mb-1 text-sm font-medium dark:text-white">Start</label>
           <DatePicker
             selected={startDate}
-            onChange={(date) => setStartDate(date)}
+            onChange={(date: Date | null) => setStartDate(date)}
             showTimeSelect
             timeFormat="HH:mm"
             timeIntervals={15}
@@ -119,13 +134,14 @@ const handleSubmit = () => {
             customInput={<StyledInput />}
             wrapperClassName="w-full"
           />
+          {errors.startDate && <p className="text-red-500 text-xs mt-1">{errors.startDate}</p>}
         </div>
 
         <div>
           <label className="block mb-1 text-sm font-medium dark:text-white">End</label>
           <DatePicker
             selected={endDate}
-            onChange={(date) => setEndDate(date)}
+            onChange={(date: Date | null) => setEndDate(date)}
             showTimeSelect
             timeFormat="HH:mm"
             timeIntervals={15}
@@ -135,6 +151,7 @@ const handleSubmit = () => {
             customInput={<StyledInput />}
             wrapperClassName="w-full"
           />
+          {errors.endDate && <p className="text-red-500 text-xs mt-1">{errors.endDate}</p>}
         </div>
       </div>
 
