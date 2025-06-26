@@ -1,101 +1,170 @@
 import Modal from "react-modal";
-import { useEffect, useState } from "react";
-// At top
-import { useCalendarStore } from '../../store/calendar'
-import type { CalendarEvent } from '../../store/calendar'
+import { useEffect, useState, forwardRef } from "react";
+import { useCalendarStore } from "../../store/calendar";
+import type { CalendarEvent } from "../../store/calendar";
+import DatePicker from "react-datepicker";
 
-// Extend props
-interface EventModalProps {
-  isOpen: boolean
-  onClose: () => void
-  initialEvent?: Partial<CalendarEvent> // For edit or prefill
-}
+const StyledInput = forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
+  ({ className, ...props }, ref) => (
+    <input
+      ref={ref}
+      {...props}
+      className={`w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white text-sm ${className}`}
+    />
+  )
+);
+StyledInput.displayName = "StyledInput";
 
-const EventModal = ({ isOpen, onClose, initialEvent }: EventModalProps) => {
-  const { addEvent, updateEvent } = useCalendarStore()
-  const [title, setTitle] = useState(initialEvent?.title || '')
-  const [start, setStart] = useState(initialEvent?.start?.toISOString().slice(0, 16) || '')
-  const [end, setEnd] = useState(initialEvent?.end?.toISOString().slice(0, 16) || '')
+const EventModal = () => {
+  const {
+    modalOpen,
+    modalEvent,
+    closeModal,
+    addEvent,
+    updateEvent,
+    deleteEvent,
+  } = useCalendarStore();
+
+  console.log("Modal Event:", modalEvent);
+  
+
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
+  const [title, setTitle] = useState("");
 
   useEffect(() => {
-    if (initialEvent) {
-      setTitle(initialEvent.title || '')
-      setStart(initialEvent.start?.toISOString().slice(0, 16) || '')
-      setEnd(initialEvent.end?.toISOString().slice(0, 16) || '')
+    if (modalOpen) {
+      setTitle(modalEvent?.title || "");
+      setStartDate(modalEvent?.start ? new Date(modalEvent.start) : null);
+      setEndDate(modalEvent?.end ? new Date(modalEvent.end) : null);
     }
-  }, [initialEvent])
+  }, [modalOpen, modalEvent]);
 
-  const handleSubmit = () => {
-    if (!title || !start || !end) return
-  console.log("working1");
+  const colorPalette = [
+    "bg-blue-500",
+    "bg-green-500",
+    "bg-yellow-500",
+    "bg-red-500",
+    "bg-purple-500",
+    "bg-pink-500",
+    "bg-indigo-500",
+    "bg-teal-500",
+  ];
   
-    const parsedStart = new Date(start)
-    const parsedEnd = new Date(end)
-  
-    if (initialEvent?.id) {
-      console.log("working2");
-
-      updateEvent({
-        id: initialEvent.id,
-        title,
-        start: parsedStart,
-        end: parsedEnd,
-        description: initialEvent.description || '',
-      })
-      console.log("working3");
-
-    } else {
-      console.log("working4");
-
-      addEvent({
-        title,
-        start: parsedStart,
-        end: parsedEnd,
-      })
-      console.log("working5");
-
-    }
-  
-    onClose()
-    console.log("working6");
-
+  function getRandomColor(): string {
+    return colorPalette[Math.floor(Math.random() * colorPalette.length)];
   }
+
+const handleSubmit = () => {
+  if (!title || !startDate || !endDate) return;
+
+  const newEvent: CalendarEvent = {
+    id: modalEvent?.id || crypto.randomUUID(),
+    title,
+    start: startDate,
+    end: endDate,
+    color: modalEvent?.color || getRandomColor(), // 💥 assign a color here
+  };
+
+  if (modalEvent?.id) {
+    updateEvent(newEvent);
+  } else {
+    addEvent(newEvent);
+  }
+
+  closeModal();
+};
+
+  const handleDelete = () => {
+    if (modalEvent?.id) {
+      deleteEvent(modalEvent.id);
+    }
+    closeModal();
+  };
 
   return (
     <Modal
-      isOpen={isOpen}
-      onRequestClose={onClose}
-      className="w-[90%] max-w-md bg-white dark:bg-gray-800 p-4 sm:p-6 rounded shadow-xl mx-auto mt-10"
-      overlayClassName="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-start sm:items-center justify-center overflow-y-auto"
+      isOpen={modalOpen}
+      onRequestClose={closeModal}
+      className="w-full max-w-md bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl mx-auto mt-20 relative z-50"
+      overlayClassName="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 flex items-center justify-center px-4"
     >
-      <h2 className="text-lg font-semibold mb-4">{initialEvent?.id ? 'Edit' : 'Create'} Event</h2>
-      <input
-        type="text"
-        placeholder="Event Title"
-        className="w-full mb-2 px-2 py-1 border rounded text-sm"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-      />
-      <input
-        type="datetime-local"
-        className="w-full mb-2 px-2 py-1 border rounded text-sm"
-        value={start}
-        onChange={(e) => setStart(e.target.value)}
-      />
-      <input
-        type="datetime-local"
-        className="w-full mb-2 px-2 py-1 border rounded text-sm"
-        value={end}
-        onChange={(e) => setEnd(e.target.value)}
-      />
-      <div className="flex justify-end gap-2 mt-4">
-        <button onClick={onClose} className="btn">Cancel</button>
-        <button onClick={handleSubmit} className="btn bg-blue-600 text-white">
-          Save
+      <h2 className="text-xl font-semibold mb-6 text-center dark:text-white">
+        {modalEvent?.id ? "Edit Event" : "Create Event"}
+      </h2>
+
+      <div className="space-y-4">
+        <div>
+          <label className="block mb-1 text-sm font-medium dark:text-white">Title</label>
+          <input
+            type="text"
+            placeholder="Event Title"
+            className="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white text-sm"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+        </div>
+
+        <div>
+          <label className="block mb-1 text-sm font-medium dark:text-white">Start</label>
+          <DatePicker
+            selected={startDate}
+            onChange={(date) => setStartDate(date)}
+            showTimeSelect
+            timeFormat="HH:mm"
+            timeIntervals={15}
+            timeCaption="Time"
+            dateFormat="MMMM d, yyyy h:mm aa"
+            placeholderText="Select start time"
+            customInput={<StyledInput />}
+            wrapperClassName="w-full"
+          />
+        </div>
+
+        <div>
+          <label className="block mb-1 text-sm font-medium dark:text-white">End</label>
+          <DatePicker
+            selected={endDate}
+            onChange={(date) => setEndDate(date)}
+            showTimeSelect
+            timeFormat="HH:mm"
+            timeIntervals={15}
+            timeCaption="Time"
+            dateFormat="MMMM d, yyyy h:mm aa"
+            placeholderText="Select end time"
+            customInput={<StyledInput />}
+            wrapperClassName="w-full"
+          />
+        </div>
+      </div>
+
+      <div className="mt-6 flex justify-between">
+        <button
+          onClick={closeModal}
+          className="px-4 py-2 rounded-md bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-sm"
+        >
+          Cancel
         </button>
+
+        <div className="flex gap-2">
+          {modalEvent?.id && (
+            <button
+              onClick={handleDelete}
+              className="px-4 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white text-sm"
+            >
+              Delete
+            </button>
+          )}
+          <button
+            onClick={handleSubmit}
+            className="px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-sm"
+          >
+            Save
+          </button>
+        </div>
       </div>
     </Modal>
-  )
-}
+  );
+};
 
-export default EventModal
+export default EventModal;

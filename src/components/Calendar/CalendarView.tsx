@@ -1,21 +1,20 @@
-import { useCalendarStore } from '../../store/calendar'
-import MonthView from './views/MonthView'
-import WeekView from './views/WeekView'
-import DayView from './views/DayView'
+import { useCalendarStore } from '../../store/calendar';
+import MonthView from './views/MonthView';
+import WeekView from './views/WeekView';
+import DayView from './views/DayView';
+import EventModal from '../Event/EventModal';
 
 const CalendarView = () => {
-  const { view } = useCalendarStore()
+  const { view } = useCalendarStore();
 
-  switch (view) {
-    case 'month':
-      return <MonthView />
-    case 'week':
-      return <WeekView />
-    case 'day':
-      return <DayView />
-    default:
-      return null
-  }
-}
+  return (
+    <>
+      {view === 'month' && <MonthView />}
+      {view === 'week' && <WeekView />}
+      {view === 'day' && <DayView />}
+      <EventModal />
+    </>
+  );
+};
 
-export default CalendarView
+export default CalendarView;
